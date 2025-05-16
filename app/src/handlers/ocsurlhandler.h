@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QJsonObject>
 
-namespace qtlib {
+namespace Qtil {
 class NetworkResource;
 }
 
@@ -31,12 +31,12 @@ public slots:
     void openDestination() const;
 
 private slots:
-    void networkResourceFinished(qtlib::NetworkResource *resource);
+    void networkResourceFinished(Qtil::NetworkResource *resource);
 
 private:
     void parse();
-    void saveDownloadedFile(qtlib::NetworkResource *resource);
-    void installDownloadedFile(qtlib::NetworkResource *resource);
+    void saveDownloadedFile(Qtil::NetworkResource *resource);
+    void installDownloadedFile(Qtil::NetworkResource *resource);
 
     QString ocsUrl_;
     ConfigHandler *configHandler_;

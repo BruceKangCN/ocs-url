@@ -1,0 +1,7 @@
+[wrap-git]
+url = https://github.com/akiraohgaki/qtil.git
+revision = v0.4.0
+depth = 1
+
+patch_directory = qtil
+diff_files = qtil.patch

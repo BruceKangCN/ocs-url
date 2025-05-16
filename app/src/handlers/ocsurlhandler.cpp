@@ -3,12 +3,12 @@
 #include <QUrlQuery>
 #include <QDesktopServices>
 
-#include "qtlib_file.h"
-#include "qtlib_dir.h"
-#include "qtlib_networkresource.h"
-#include "qtlib_package.h"
+#include "qtil_file.h"
+#include "qtil_dir.h"
+#include "qtil_networkresource.h"
+#include "qtil_package.h"
 
-#include "handlers/confighandler.h"
+#include "confighandler.h"
 
 OcsUrlHandler::OcsUrlHandler(const QString &ocsUrl, ConfigHandler *configHandler, QObject *parent)
     : QObject(parent), ocsUrl_(ocsUrl), configHandler_(configHandler)
@@ -40,9 +40,9 @@ void OcsUrlHandler::process()
     }
 
     auto url = metadata_["url"].toString();
-    auto *resource = new qtlib::NetworkResource(url, QUrl(url), true, this);
-    connect(resource, &qtlib::NetworkResource::downloadProgress, this, &OcsUrlHandler::downloadProgress);
-    connect(resource, &qtlib::NetworkResource::finished, this, &OcsUrlHandler::networkResourceFinished);
+    auto *resource = new Qtil::NetworkResource(url, QUrl(url), true, this);
+    connect(resource, &Qtil::NetworkResource::downloadProgress, this, &OcsUrlHandler::downloadProgress);
+    connect(resource, &Qtil::NetworkResource::finished, this, &OcsUrlHandler::networkResourceFinished);
     resource->get();
     emit started();
 }
@@ -72,7 +72,7 @@ void OcsUrlHandler::openDestination() const
     QDesktopServices::openUrl(QUrl("file://" + configHandler_->getAppConfigInstallTypes()[type].toObject()["destination"].toString()));
 }
 
-void OcsUrlHandler::networkResourceFinished(qtlib::NetworkResource *resource)
+void OcsUrlHandler::networkResourceFinished(Qtil::NetworkResource *resource)
 {
     if (!resource->isFinishedWithNoError()) {
         QJsonObject result;
@@ -127,14 +127,14 @@ void OcsUrlHandler::parse()
     }
 }
 
-void OcsUrlHandler::saveDownloadedFile(qtlib::NetworkResource *resource)
+void OcsUrlHandler::saveDownloadedFile(Qtil::NetworkResource *resource)
 {
     QJsonObject result;
 
     auto type = metadata_["type"].toString();
-    qtlib::Dir destDir(configHandler_->getAppConfigInstallTypes()[type].toObject()["destination"].toString());
+    Qtil::Dir destDir(configHandler_->getAppConfigInstallTypes()[type].toObject()["destination"].toString());
     destDir.make();
-    qtlib::File destFile(destDir.path() + "/" + metadata_["filename"].toString());
+    Qtil::File destFile(destDir.path() + "/" + metadata_["filename"].toString());
 
     if (!resource->saveData(destFile.path())) {
         result["status"] = QString("error_save");
@@ -151,11 +151,11 @@ void OcsUrlHandler::saveDownloadedFile(qtlib::NetworkResource *resource)
     resource->deleteLater();
 }
 
-void OcsUrlHandler::installDownloadedFile(qtlib::NetworkResource *resource)
+void OcsUrlHandler::installDownloadedFile(Qtil::NetworkResource *resource)
 {
     QJsonObject result;
 
-    qtlib::File tempFile(qtlib::Dir::tempPath() + "/" + metadata_["filename"].toString());
+    Qtil::File tempFile(Qtil::Dir::tempPath() + "/" + metadata_["filename"].toString());
 
     if (!resource->saveData(tempFile.path())) {
         result["status"] = QString("error_save");
@@ -165,11 +165,11 @@ void OcsUrlHandler::installDownloadedFile(qtlib::NetworkResource *resource)
         return;
     }
 
-    qtlib::Package package(tempFile.path());
+    Qtil::Package package(tempFile.path());
     auto type = metadata_["type"].toString();
-    qtlib::Dir destDir(configHandler_->getAppConfigInstallTypes()[type].toObject()["destination"].toString());
+    Qtil::Dir destDir(configHandler_->getAppConfigInstallTypes()[type].toObject()["destination"].toString());
     destDir.make();
-    qtlib::File destFile(destDir.path() + "/" + metadata_["filename"].toString());
+    Qtil::File destFile(destDir.path() + "/" + metadata_["filename"].toString());
 
     if (type == "bin"
             && package.installAsProgram(destFile.path())) {
